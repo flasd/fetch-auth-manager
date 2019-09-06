@@ -12,7 +12,8 @@
   "scripts": {
     "build:client": "babel src/index.js --out-file index.js --source-maps",
     "build:server": "babel src/server.js --out-file server.js --source-maps",
-    "build": "yarn build:client && yarn build:server"
+    "build": "yarn build:client && yarn build:server",
+    "prepublish": "yarn build"
   },
   "browserslist": "> 0.25%, not dead",
   "devDependencies": {
