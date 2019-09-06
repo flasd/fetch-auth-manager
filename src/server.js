@@ -85,12 +85,12 @@ export default function fetchAuthManager(options = {}) {
   return (req, res, next) => {
     const {
       headers: {
-        authentication,
-        Authentication,
+        Authorization,
+        authorization,
       },
     } = req;
 
-    const JWT_TOKEN = `${authentication || Authentication}`.replace('Bearer ', '');
+    const JWT_TOKEN = `${Authorization || authorization}`.replace('Bearer ', '');
 
     if (!JWT_TOKEN) {
       req.user = null;
