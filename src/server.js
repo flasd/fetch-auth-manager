@@ -104,6 +104,12 @@ export default function fetchAuthManager(options = {}) {
         values.jwtSecret,
       );
 
+      if (!decoded) {
+        req.user = null;
+        next();
+        return;
+      }
+
       const { exp } = decoded;
 
       const now = Math.round(Date.now() / 1000);
