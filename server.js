@@ -5,7 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.createToken = createToken;
 exports.logout = logout;
-exports.default = fetchAuthManager;
+exports.decode = decode;
+exports.fetchAuthManager = fetchAuthManager;
 
 var _secureRandomString = _interopRequireDefault(require("secure-random-string"));
 
@@ -75,6 +76,27 @@ function logout(res) {
   res.header('X-Token-Remove', 'remove');
 }
 /**
+ * @function decode
+ * @param  {String} header
+ * @param  {String} jwtSecret
+ * @return {?Object} Decoded JWT or null
+ */
+
+
+function decode(header, jwtSecret) {
+  var JWT_TOKEN = "".concat(header).replace('Bearer ', '');
+
+  if (!JWT_TOKEN) {
+    return null;
+  }
+
+  try {
+    return _jsonwebtoken.default.decode(JWT_TOKEN, jwtSecret);
+  } catch (error) {
+    return null;
+  }
+}
+/**
  * @typedef {Function} FetchAuthManagerMiddleware
  * @param {ExpressRequest} req Express-like request object
  * @param {ExpressResponse} res Express-like response object
@@ -100,16 +122,9 @@ function fetchAuthManager() {
     var _req$headers = req.headers,
         Authorization = _req$headers.Authorization,
         authorization = _req$headers.authorization;
-    var JWT_TOKEN = "".concat(Authorization || authorization).replace('Bearer ', '');
-
-    if (!JWT_TOKEN) {
-      req.user = null;
-      next();
-      return;
-    }
 
     try {
-      var decoded = _jsonwebtoken.default.decode(JWT_TOKEN, values.jwtSecret);
+      var decoded = decode(Authorization || authorization);
 
       if (!decoded) {
         req.user = null;
