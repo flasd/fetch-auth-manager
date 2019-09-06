@@ -64,6 +64,29 @@ export function logout(res) {
 }
 
 /**
+ * @function decode
+ * @param  {String} header
+ * @param  {String} jwtSecret
+ * @return {?Object} Decoded JWT or null
+ */
+export function decode(header, jwtSecret) {
+  const JWT_TOKEN = `${header}`.replace('Bearer ', '');
+
+  if (!JWT_TOKEN) {
+    return null;
+  }
+
+  try {
+    return jsonWebToken.decode(
+      JWT_TOKEN,
+      jwtSecret,
+    );
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
  * @typedef {Function} FetchAuthManagerMiddleware
  * @param {ExpressRequest} req Express-like request object
  * @param {ExpressResponse} res Express-like response object
@@ -76,7 +99,7 @@ export function logout(res) {
  * @param  {Options} options Jwt options
  * @return {FetchAuthManagerMiddleware} Middleware to handle auth
  */
-export default function fetchAuthManager(options = {}) {
+export function fetchAuthManager(options = {}) {
   const values = {
     ...defaults,
     options,
@@ -90,19 +113,8 @@ export default function fetchAuthManager(options = {}) {
       },
     } = req;
 
-    const JWT_TOKEN = `${Authorization || authorization}`.replace('Bearer ', '');
-
-    if (!JWT_TOKEN) {
-      req.user = null;
-      next();
-      return;
-    }
-
     try {
-      const decoded = jsonWebToken.decode(
-        JWT_TOKEN,
-        values.jwtSecret,
-      );
+      const decoded = decode(Authorization || authorization);
 
       if (!decoded) {
         req.user = null;
