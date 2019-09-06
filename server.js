@@ -111,6 +111,12 @@ function fetchAuthManager() {
     try {
       var decoded = _jsonwebtoken.default.decode(JWT_TOKEN, values.jwtSecret);
 
+      if (!decoded) {
+        req.user = null;
+        next();
+        return;
+      }
+
       var exp = decoded.exp;
       var now = Math.round(Date.now() / 1000);
       var diff = exp - now;
