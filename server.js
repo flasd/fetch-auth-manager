@@ -98,9 +98,9 @@ function fetchAuthManager() {
 
   return function (req, res, next) {
     var _req$headers = req.headers,
-        authentication = _req$headers.authentication,
-        Authentication = _req$headers.Authentication;
-    var JWT_TOKEN = "".concat(authentication || Authentication).replace('Bearer ', '');
+        Authorization = _req$headers.Authorization,
+        authorization = _req$headers.authorization;
+    var JWT_TOKEN = "".concat(Authorization || authorization).replace('Bearer ', '');
 
     if (!JWT_TOKEN) {
       req.user = null;
