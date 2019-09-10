@@ -10,7 +10,7 @@ exports.AuthConsumer = exports.AuthProvider = exports.subscribers = void 0;
 
 var _apolloLink = require("apollo-link");
 
-var _react = require("react");
+var _react = _interopRequireDefault(require("react"));
 
 var _jwtDecode = _interopRequireDefault(require("jwt-decode"));
 
@@ -180,7 +180,7 @@ function _createWsParams() {
   return _createWsParams.apply(this, arguments);
 }
 
-var AuthContext = _react.React.createContext();
+var AuthContext = _react.default.createContext();
 
 var AuthProvider =
 /*#__PURE__*/
@@ -253,7 +253,7 @@ function (_React$Component) {
           hasAuth = _this$state.hasAuth,
           user = _this$state.user;
       var children = this.props.children;
-      return _react.React.createElement(AuthContext.Provider, {
+      return _react.default.createElement(AuthContext.Provider, {
         value: {
           hasAuth: hasAuth,
           user: user
@@ -263,7 +263,7 @@ function (_React$Component) {
   }]);
 
   return AuthProvider;
-}(_react.React.Component);
+}(_react.default.Component);
 
 exports.AuthProvider = AuthProvider;
 var AuthConsumer = AuthContext.Consumer;
@@ -271,9 +271,9 @@ exports.AuthConsumer = AuthConsumer;
 
 function withAuth(UserComponent) {
   function CustomComponent(props) {
-    return _react.React.createElement(AuthConsumer, function (_ref2) {
+    return _react.default.createElement(AuthConsumer, function (_ref2) {
       var values = _ref2.values;
-      return _react.React.createElement(UserComponent, _objectSpread({}, props, {}, values));
+      return _react.default.createElement(UserComponent, _objectSpread({}, props, {}, values));
     });
   }
 
