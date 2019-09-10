@@ -1,5 +1,5 @@
 import { ApolloLink } from 'apollo-link';
-import { React } from 'react';
+import React from 'react';
 import decode from 'jwt-decode';
 import hoinstStatics from 'hoist-non-react-statics';
 
