@@ -1,4 +1,9 @@
 import { ApolloLink } from 'apollo-link';
+import { React } from 'react';
+import decode from 'jwt-decode';
+import hoinstStatics from 'hoist-non-react-statics';
+
+export const subscribers = [];
 
 /**
  * @typedef {Object} Options apollo options options
@@ -33,10 +38,12 @@ function handleResponse(values) {
 
     if (xTokenCreate || xTokenUpdate) {
       localStorage.setItem(values.localStorageKey, xTokenCreate || xTokenUpdate);
+      subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`.replace('Bearer ', ''))));
     }
 
     if (xTokenRemove) {
       localStorage.removeItem(values.localStorageKey);
+      subscribers.forEach((s) => s(null));
     }
 
     return response;
@@ -48,10 +55,9 @@ function handleResponse(values) {
  * @param  {type} options {description}
  * @return {GraphLink} Returns a manager link
  */
-export default function createAuthManagerLink(options = {}) {
+export default function createAuthManagerLink() {
   const values = {
     ...defaults,
-    options,
   };
 
   return new ApolloLink((operation, forward) => {
@@ -94,3 +100,92 @@ export async function createWsParams(partialParams = {}, options) {
     authorization: localStorage.getItem(values.localStorageKey) || null,
   };
 }
+
+const AuthContext = React.createContext();
+
+export class AuthProvider extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const decoded = decode(localStorage.getItem(defaults.localStorageKey));
+
+    this.state = {
+      hasAuth: !!decoded,
+      user: decoded,
+    };
+
+    this.handleUpdate = this.handleUpdate.bind(this);
+  }
+
+  componentDidMount() {
+    subscribers.push(this.handleUpdate);
+  }
+
+  handleUpdate(decoded) {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
+
+    if (decoded) {
+      const { exp } = decoded;
+
+      const now = Math.round(Date.now() / 1000);
+      const diff = exp - now;
+
+      if (diff <= 0) {
+        this.handleUpdate(null);
+        return;
+      }
+
+      if (diff > 0 && diff < 3600) {
+        setTimeout(() => this.handleUpdate(null), diff * 1000);
+      }
+
+      this.setState({
+        hasAuth: true,
+        user: decoded,
+      });
+
+      return;
+    }
+
+    localStorage.removeItem(defaults.localStorageKey);
+
+    this.setState({
+      hasAuth: false,
+      user: null,
+    });
+  }
+
+  render() {
+    const { hasAuth, user } = this.state;
+    const { children } = this.props;
+
+    return React.createElement(AuthContext.Provider, {
+      value: {
+        hasAuth,
+        user,
+      },
+    }, children);
+  }
+}
+
+const { Consumer: AuthConsumer } = AuthContext;
+
+export function withAuth(UserComponent) {
+  function CustomComponent(props) {
+    return React.createElement(
+      AuthConsumer,
+      ({ values }) => React.createElement(UserComponent, { ...props, ...values }),
+    );
+  }
+
+  hoinstStatics(CustomComponent, UserComponent);
+
+  CustomComponent.displayName = `withAuth(${UserComponent.displayName || UserComponent.name})`;
+
+  return CustomComponent;
+}
+
+export { AuthConsumer };

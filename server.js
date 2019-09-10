@@ -135,12 +135,19 @@ function fetchAuthManager() {
       var exp = decoded.exp;
       var now = Math.round(Date.now() / 1000);
       var diff = exp - now;
-      var reference = values.jwtLifetime / 3 * 2;
 
-      if (diff < reference) {
-        createToken(req, _objectSpread({}, decoded), _objectSpread({}, values, {
-          update: true
-        }));
+      if (diff > 0) {
+        var reference = values.jwtLifetime / 3 * 2;
+
+        if (diff < reference) {
+          createToken(req, _objectSpread({}, decoded), _objectSpread({}, values, {
+            update: true
+          }));
+        }
+      } else {
+        req.user = null;
+        logout(res);
+        return;
       }
 
       req.user = _objectSpread({}, decoded);

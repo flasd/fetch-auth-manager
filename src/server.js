@@ -126,10 +126,17 @@ export function fetchAuthManager(options = {}) {
 
       const now = Math.round(Date.now() / 1000);
       const diff = exp - now;
-      const reference = (values.jwtLifetime / 3) * 2;
 
-      if (diff < reference) {
-        createToken(req, { ...decoded }, { ...values, update: true });
+      if (diff > 0) {
+        const reference = (values.jwtLifetime / 3) * 2;
+
+        if (diff < reference) {
+          createToken(req, { ...decoded }, { ...values, update: true });
+        }
+      } else {
+        req.user = null;
+        logout(res);
+        return;
       }
 
       req.user = {
