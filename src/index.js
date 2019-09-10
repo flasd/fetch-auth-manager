@@ -1,7 +1,15 @@
 import { ApolloLink } from 'apollo-link';
 import React from 'react';
-import decode from 'jwt-decode';
+import decodeJWT from 'jwt-decode';
 import hoinstStatics from 'hoist-non-react-statics';
+
+function decode(raw) {
+  try {
+    return decodeJWT(raw);
+  } catch (error) {
+    return null;
+  }
+}
 
 export const subscribers = [];
 

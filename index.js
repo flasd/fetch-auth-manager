@@ -46,6 +46,14 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function decode(raw) {
+  try {
+    return (0, _jwtDecode.default)(raw);
+  } catch (error) {
+    return null;
+  }
+}
+
 var subscribers = [];
 /**
  * @typedef {Object} Options apollo options options
@@ -80,7 +88,7 @@ function handleResponse(values) {
     if (xTokenCreate || xTokenUpdate) {
       localStorage.setItem(values.localStorageKey, xTokenCreate || xTokenUpdate);
       subscribers.forEach(function (s) {
-        return s((0, _jwtDecode.default)("".concat(xTokenCreate || xTokenUpdate).replace('Bearer ', '')));
+        return s(decode("".concat(xTokenCreate || xTokenUpdate).replace('Bearer ', '')));
       });
     }
 
@@ -193,7 +201,7 @@ function (_React$Component) {
     _classCallCheck(this, AuthProvider);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthProvider).call(this, props));
-    var decoded = (0, _jwtDecode.default)(localStorage.getItem(defaults.localStorageKey));
+    var decoded = decode(localStorage.getItem(defaults.localStorageKey));
     _this.state = {
       hasAuth: !!decoded,
       user: decoded
