@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = createAuthManagerLink;
+exports.createAuthManagerLink = createAuthManagerLink;
 exports.createWsParams = createWsParams;
 exports.withAuth = withAuth;
 exports.AuthConsumer = exports.AuthProvider = exports.subscribers = void 0;

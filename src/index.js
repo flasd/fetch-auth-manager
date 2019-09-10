@@ -55,7 +55,7 @@ function handleResponse(values) {
  * @param  {type} options {description}
  * @return {GraphLink} Returns a manager link
  */
-export default function createAuthManagerLink() {
+export function createAuthManagerLink() {
   const values = {
     ...defaults,
   };
