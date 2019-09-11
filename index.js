@@ -262,6 +262,11 @@ function (_React$Component) {
           hasAuth = _this$state.hasAuth,
           user = _this$state.user;
       var children = this.props.children;
+
+      if (!hasAuth) {
+        localStorage.removeItem(localStorageKey);
+      }
+
       return _react.default.createElement(AuthContext.Provider, {
         value: {
           hasAuth: hasAuth,
