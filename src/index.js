@@ -169,6 +169,10 @@ export class AuthProvider extends React.Component {
     const { hasAuth, user } = this.state;
     const { children } = this.props;
 
+    if (!hasAuth) {
+      localStorage.removeItem(localStorageKey);
+    }
+
     return React.createElement(AuthContext.Provider, {
       value: {
         hasAuth,
