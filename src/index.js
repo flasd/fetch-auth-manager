@@ -185,7 +185,11 @@ export function withAuth(UserComponent) {
   function CustomComponent(props) {
     return React.createElement(
       AuthConsumer,
-      ({ values }) => React.createElement(UserComponent, { ...props, ...values }),
+      {},
+      // eslint-disable-next-line prefer-arrow-callback
+      function renderer(values) {
+        return React.createElement(UserComponent, { ...props, ...values });
+      },
     );
   }
 

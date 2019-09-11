@@ -279,8 +279,8 @@ exports.AuthConsumer = AuthConsumer;
 
 function withAuth(UserComponent) {
   function CustomComponent(props) {
-    return _react.default.createElement(AuthConsumer, function (_ref2) {
-      var values = _ref2.values;
+    return _react.default.createElement(AuthConsumer, {}, // eslint-disable-next-line prefer-arrow-callback
+    function renderer(values) {
       return _react.default.createElement(UserComponent, _objectSpread({}, props, {}, values));
     });
   }
