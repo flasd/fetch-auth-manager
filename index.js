@@ -3,10 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.setLocalStorageKey = setLocalStorageKey;
+exports.getLocalStorageKey = getLocalStorageKey;
 exports.createAuthManagerLink = createAuthManagerLink;
 exports.createWsParams = createWsParams;
 exports.withAuth = withAuth;
-exports.AuthConsumer = exports.AuthProvider = exports.subscribers = void 0;
+exports.AuthConsumer = exports.AuthProvider = void 0;
 
 var _apolloLink = require("apollo-link");
 
@@ -55,15 +57,19 @@ function decode(raw) {
 }
 
 var subscribers = [];
-/**
- * @typedef {Object} Options apollo options options
- * @property {string} localStorageKey Key in the local storage to store jwt to
- */
+var localStorageKey = 'CHANGE_THIS_VALUE';
 
-exports.subscribers = subscribers;
-var defaults = {
-  localStorageKey: '5cnasGf8fvJFB8WW2Uxrayc5'
-};
+if (process.env.NODE_ENV === 'production') {
+  localStorageKey = '789519fa69a45c83c7e0b1e350c81000945ac366';
+}
+
+function setLocalStorageKey(value) {
+  localStorageKey = value;
+}
+
+function getLocalStorageKey() {
+  return localStorageKey;
+}
 /**
  * @typedef {Function} GraphQlLinkMiddleware handles graphql http response
  * @property {Object} GraphQlResponse in the local storage to store jwt to
@@ -77,30 +83,29 @@ var defaults = {
  * @return {GraphQlLinkMiddleware} Function that handles the response
  */
 
-function handleResponse(values) {
-  return function (response) {
-    var _response$headers = response.headers,
-        headers = _response$headers === void 0 ? {} : _response$headers;
-    var xTokenCreate = headers['X-Token-Create'],
-        xTokenUpdate = headers['X-Token-Update'],
-        xTokenRemove = headers['X-Token-Remove'];
 
-    if (xTokenCreate || xTokenUpdate) {
-      localStorage.setItem(values.localStorageKey, xTokenCreate || xTokenUpdate);
-      subscribers.forEach(function (s) {
-        return s(decode("".concat(xTokenCreate || xTokenUpdate).replace('Bearer ', '')));
-      });
-    }
+function handleResponse(response) {
+  var _response$headers = response.headers,
+      headers = _response$headers === void 0 ? {} : _response$headers;
+  var xTokenCreate = headers['X-Token-Create'],
+      xTokenUpdate = headers['X-Token-Update'],
+      xTokenRemove = headers['X-Token-Remove'];
 
-    if (xTokenRemove) {
-      localStorage.removeItem(values.localStorageKey);
-      subscribers.forEach(function (s) {
-        return s(null);
-      });
-    }
+  if (xTokenCreate || xTokenUpdate) {
+    localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
+    subscribers.forEach(function (s) {
+      return s(decode("".concat(xTokenCreate || xTokenUpdate).replace('Bearer ', '')));
+    });
+  }
 
-    return response;
-  };
+  if (xTokenRemove) {
+    localStorage.removeItem(localStorageKey);
+    subscribers.forEach(function (s) {
+      return s(null);
+    });
+  }
+
+  return response;
 }
 /**
  * @function createAuthManagerLink
@@ -110,7 +115,10 @@ function handleResponse(values) {
 
 
 function createAuthManagerLink() {
-  var values = _objectSpread({}, defaults);
+  if (localStorageKey === 'CHANGE_THIS_VALUE' && process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.warn('Please update the localStorageKey by calling setLocalStorageKey(yourKey)');
+  }
 
   return new _apolloLink.ApolloLink(function (operation, forward) {
     operation.setContext(function (_ref) {
@@ -118,11 +126,11 @@ function createAuthManagerLink() {
           headers = _ref$headers === void 0 ? {} : _ref$headers;
       return {
         headers: _objectSpread({}, headers, {
-          authorization: localStorage.getItem(values.localStorageKey) || null
+          authorization: localStorage.getItem(localStorageKey) || null
         })
       };
     });
-    return forward(operation).map(handleResponse(values));
+    return forward(operation).map(handleResponse);
   });
 }
 /**
@@ -143,42 +151,35 @@ function _createWsParams() {
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee() {
     var partialParams,
-        options,
-        values,
         _args = arguments;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             partialParams = _args.length > 0 && _args[0] !== undefined ? _args[0] : {};
-            options = _args.length > 1 ? _args[1] : undefined;
 
             /* eslint-disable no-param-reassign */
-            values = _objectSpread({}, defaults, {
-              options: options
-            });
-
             if (typeof partialParams === 'function') {
               partialParams = partialParams();
             }
 
             if (!(typeof partialParams.then === 'function')) {
-              _context.next = 8;
+              _context.next = 6;
               break;
             }
 
-            _context.next = 7;
+            _context.next = 5;
             return partialParams;
 
-          case 7:
+          case 5:
             partialParams = _context.sent;
 
-          case 8:
+          case 6:
             return _context.abrupt("return", _objectSpread({}, partialParams, {
-              authorization: localStorage.getItem(values.localStorageKey) || null
+              authorization: localStorage.getItem(localStorageKey) || null
             }));
 
-          case 9:
+          case 7:
           case "end":
             return _context.stop();
         }
@@ -201,7 +202,7 @@ function (_React$Component) {
     _classCallCheck(this, AuthProvider);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AuthProvider).call(this, props));
-    var decoded = decode(localStorage.getItem(defaults.localStorageKey));
+    var decoded = decode(localStorage.getItem(localStorageKey));
     _this.state = {
       hasAuth: !!decoded,
       user: decoded
@@ -248,7 +249,7 @@ function (_React$Component) {
         return;
       }
 
-      localStorage.removeItem(defaults.localStorageKey);
+      localStorage.removeItem(localStorageKey);
       this.setState({
         hasAuth: false,
         user: null

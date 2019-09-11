@@ -11,16 +11,22 @@ function decode(raw) {
   }
 }
 
-export const subscribers = [];
+const subscribers = [];
 
-/**
- * @typedef {Object} Options apollo options options
- * @property {string} localStorageKey Key in the local storage to store jwt to
- */
 
-const defaults = {
-  localStorageKey: '5cnasGf8fvJFB8WW2Uxrayc5',
-};
+let localStorageKey = 'CHANGE_THIS_VALUE';
+
+if (process.env.NODE_ENV === 'production') {
+  localStorageKey = '789519fa69a45c83c7e0b1e350c81000945ac366';
+}
+
+export function setLocalStorageKey(value) {
+  localStorageKey = value;
+}
+
+export function getLocalStorageKey() {
+  return localStorageKey;
+}
 
 /**
  * @typedef {Function} GraphQlLinkMiddleware handles graphql http response
@@ -34,28 +40,26 @@ const defaults = {
  * @param  {Options} values Config values
  * @return {GraphQlLinkMiddleware} Function that handles the response
  */
-function handleResponse(values) {
-  return (response) => {
-    const { headers = {} } = response;
+function handleResponse(response) {
+  const { headers = {} } = response;
 
-    const {
-      'X-Token-Create': xTokenCreate,
-      'X-Token-Update': xTokenUpdate,
-      'X-Token-Remove': xTokenRemove,
-    } = headers;
+  const {
+    'X-Token-Create': xTokenCreate,
+    'X-Token-Update': xTokenUpdate,
+    'X-Token-Remove': xTokenRemove,
+  } = headers;
 
-    if (xTokenCreate || xTokenUpdate) {
-      localStorage.setItem(values.localStorageKey, xTokenCreate || xTokenUpdate);
-      subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`.replace('Bearer ', ''))));
-    }
+  if (xTokenCreate || xTokenUpdate) {
+    localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
+    subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`.replace('Bearer ', ''))));
+  }
 
-    if (xTokenRemove) {
-      localStorage.removeItem(values.localStorageKey);
-      subscribers.forEach((s) => s(null));
-    }
+  if (xTokenRemove) {
+    localStorage.removeItem(localStorageKey);
+    subscribers.forEach((s) => s(null));
+  }
 
-    return response;
-  };
+  return response;
 }
 
 /**
@@ -64,19 +68,20 @@ function handleResponse(values) {
  * @return {GraphLink} Returns a manager link
  */
 export function createAuthManagerLink() {
-  const values = {
-    ...defaults,
-  };
+  if (localStorageKey === 'CHANGE_THIS_VALUE' && process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.warn('Please update the localStorageKey by calling setLocalStorageKey(yourKey)');
+  }
 
   return new ApolloLink((operation, forward) => {
     operation.setContext(({ headers = {} }) => ({
       headers: {
         ...headers,
-        authorization: localStorage.getItem(values.localStorageKey) || null,
+        authorization: localStorage.getItem(localStorageKey) || null,
       },
     }));
 
-    return forward(operation).map(handleResponse(values));
+    return forward(operation).map(handleResponse);
   });
 }
 
@@ -87,14 +92,8 @@ export function createAuthManagerLink() {
  * @return {Object} Ws Connection Params
  * @description Make `lazy: true` in WsLink options
  */
-export async function createWsParams(partialParams = {}, options) {
+export async function createWsParams(partialParams = {}) {
   /* eslint-disable no-param-reassign */
-
-  const values = {
-    ...defaults,
-    options,
-  };
-
   if (typeof partialParams === 'function') {
     partialParams = partialParams();
   }
@@ -105,7 +104,7 @@ export async function createWsParams(partialParams = {}, options) {
 
   return {
     ...partialParams,
-    authorization: localStorage.getItem(values.localStorageKey) || null,
+    authorization: localStorage.getItem(localStorageKey) || null,
   };
 }
 
@@ -115,7 +114,7 @@ export class AuthProvider extends React.Component {
   constructor(props) {
     super(props);
 
-    const decoded = decode(localStorage.getItem(defaults.localStorageKey));
+    const decoded = decode(localStorage.getItem(localStorageKey));
 
     this.state = {
       hasAuth: !!decoded,
@@ -158,7 +157,7 @@ export class AuthProvider extends React.Component {
       return;
     }
 
-    localStorage.removeItem(defaults.localStorageKey);
+    localStorage.removeItem(localStorageKey);
 
     this.setState({
       hasAuth: false,
