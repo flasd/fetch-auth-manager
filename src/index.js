@@ -34,33 +34,34 @@ export function getLocalStorageKey() {
  * @property {Object} GraphQlResponse.headers Server response headers
  */
 
-/**
- * @function handleResponse
- * @private
- * @param  {Options} values Config values
- * @return {GraphQlLinkMiddleware} Function that handles the response
- */
-function handleResponse(response) {
-  const { headers = {} } = response;
+// /**
+//  * @function handleResponse
+//  * @private
+//  * @param  {Options} values Config values
+//  * @return {GraphQlLinkMiddleware} Function that handles the response
+//  */
+// function handleResponse(response) {
+//   const { headers = {} } = response;
 
-  const {
-    'X-Token-Create': xTokenCreate,
-    'X-Token-Update': xTokenUpdate,
-    'X-Token-Remove': xTokenRemove,
-  } = headers;
+//   const {
+//     'X-Token-Create': xTokenCreate,
+//     'X-Token-Update': xTokenUpdate,
+//     'X-Token-Remove': xTokenRemove,
+//   } = headers;
 
-  if (xTokenCreate || xTokenUpdate) {
-    localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
-    subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`.replace('Bearer ', ''))));
-  }
+//   if (xTokenCreate || xTokenUpdate) {
+//     localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
+//     subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`
+//       .replace('Bearer ', ''))));
+//   }
 
-  if (xTokenRemove) {
-    localStorage.removeItem(localStorageKey);
-    subscribers.forEach((s) => s(null));
-  }
+//   if (xTokenRemove) {
+//     localStorage.removeItem(localStorageKey);
+//     subscribers.forEach((s) => s(null));
+//   }
 
-  return response;
-}
+//   return response;
+// }
 
 /**
  * @function createAuthManagerLink
@@ -81,7 +82,27 @@ export function createAuthManagerLink() {
       },
     }));
 
-    return forward(operation).map(handleResponse);
+    return forward(operation).map(
+      (response) => {
+        const { response: { headers } } = operation.getContext();
+
+        const xTokenCreate = headers.get('X-Token-Create');
+        const xTokenUpdate = headers.get('X-Token-Update');
+        const xTokenRemove = headers.get('X-Token-Remove');
+
+        if (xTokenCreate || xTokenUpdate) {
+          localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
+          subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`.replace('Bearer ', ''))));
+        }
+
+        if (xTokenRemove) {
+          localStorage.removeItem(localStorageKey);
+          subscribers.forEach((s) => s(null));
+        }
+
+        return response;
+      },
+    );
   });
 }
 

@@ -75,38 +75,31 @@ function getLocalStorageKey() {
  * @property {Object} GraphQlResponse in the local storage to store jwt to
  * @property {Object} GraphQlResponse.headers Server response headers
  */
+// /**
+//  * @function handleResponse
+//  * @private
+//  * @param  {Options} values Config values
+//  * @return {GraphQlLinkMiddleware} Function that handles the response
+//  */
+// function handleResponse(response) {
+//   const { headers = {} } = response;
+//   const {
+//     'X-Token-Create': xTokenCreate,
+//     'X-Token-Update': xTokenUpdate,
+//     'X-Token-Remove': xTokenRemove,
+//   } = headers;
+//   if (xTokenCreate || xTokenUpdate) {
+//     localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
+//     subscribers.forEach((s) => s(decode(`${xTokenCreate || xTokenUpdate}`
+//       .replace('Bearer ', ''))));
+//   }
+//   if (xTokenRemove) {
+//     localStorage.removeItem(localStorageKey);
+//     subscribers.forEach((s) => s(null));
+//   }
+//   return response;
+// }
 
-/**
- * @function handleResponse
- * @private
- * @param  {Options} values Config values
- * @return {GraphQlLinkMiddleware} Function that handles the response
- */
-
-
-function handleResponse(response) {
-  var _response$headers = response.headers,
-      headers = _response$headers === void 0 ? {} : _response$headers;
-  var xTokenCreate = headers['X-Token-Create'],
-      xTokenUpdate = headers['X-Token-Update'],
-      xTokenRemove = headers['X-Token-Remove'];
-
-  if (xTokenCreate || xTokenUpdate) {
-    localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
-    subscribers.forEach(function (s) {
-      return s(decode("".concat(xTokenCreate || xTokenUpdate).replace('Bearer ', '')));
-    });
-  }
-
-  if (xTokenRemove) {
-    localStorage.removeItem(localStorageKey);
-    subscribers.forEach(function (s) {
-      return s(null);
-    });
-  }
-
-  return response;
-}
 /**
  * @function createAuthManagerLink
  * @param  {type} options {description}
@@ -130,7 +123,30 @@ function createAuthManagerLink() {
         })
       };
     });
-    return forward(operation).map(handleResponse);
+    return forward(operation).map(function (response) {
+      var _operation$getContext = operation.getContext(),
+          headers = _operation$getContext.response.headers;
+
+      var xTokenCreate = headers.get('X-Token-Create');
+      var xTokenUpdate = headers.get('X-Token-Update');
+      var xTokenRemove = headers.get('X-Token-Remove');
+
+      if (xTokenCreate || xTokenUpdate) {
+        localStorage.setItem(localStorageKey, xTokenCreate || xTokenUpdate);
+        subscribers.forEach(function (s) {
+          return s(decode("".concat(xTokenCreate || xTokenUpdate).replace('Bearer ', '')));
+        });
+      }
+
+      if (xTokenRemove) {
+        localStorage.removeItem(localStorageKey);
+        subscribers.forEach(function (s) {
+          return s(null);
+        });
+      }
+
+      return response;
+    });
   });
 }
 /**
