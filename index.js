@@ -72,11 +72,15 @@ function getLocalStorageKey() {
   return localStorageKey;
 }
 
-function logout() {
+function logout(callback) {
   localStorage.removeItem(localStorageKey);
   subscribers.forEach(function (s) {
     return s(null);
   });
+
+  if (typeof callback === 'function') {
+    callback();
+  }
 }
 /**
  * @typedef {Function} GraphQlLinkMiddleware handles graphql http response

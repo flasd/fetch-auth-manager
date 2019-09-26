@@ -28,9 +28,13 @@ export function getLocalStorageKey() {
   return localStorageKey;
 }
 
-export function logout() {
+export function logout(callback) {
   localStorage.removeItem(localStorageKey);
   subscribers.forEach((s) => s(null));
+
+  if (typeof callback === 'function') {
+    callback();
+  }
 }
 
 /**
