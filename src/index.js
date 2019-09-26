@@ -28,6 +28,11 @@ export function getLocalStorageKey() {
   return localStorageKey;
 }
 
+export function logout() {
+  localStorage.removeItem(localStorageKey);
+  subscribers.forEach((s) => s(null));
+}
+
 /**
  * @typedef {Function} GraphQlLinkMiddleware handles graphql http response
  * @property {Object} GraphQlResponse in the local storage to store jwt to

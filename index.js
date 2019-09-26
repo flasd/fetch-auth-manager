@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.setLocalStorageKey = setLocalStorageKey;
 exports.getLocalStorageKey = getLocalStorageKey;
+exports.logout = logout;
 exports.createAuthManagerLink = createAuthManagerLink;
 exports.createWsParams = createWsParams;
 exports.withAuth = withAuth;
@@ -69,6 +70,13 @@ function setLocalStorageKey(value) {
 
 function getLocalStorageKey() {
   return localStorageKey;
+}
+
+function logout() {
+  localStorage.removeItem(localStorageKey);
+  subscribers.forEach(function (s) {
+    return s(null);
+  });
 }
 /**
  * @typedef {Function} GraphQlLinkMiddleware handles graphql http response
