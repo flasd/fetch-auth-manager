@@ -15,14 +15,13 @@ export function onRequest(config) {
 export function onResponse(response) {
   const { headers } = response;
 
-  const xTokenCreate = headers.get('X-Token-Create');
-  const xTokenUpdate = headers.get('X-Token-Update');
-  const xTokenRemove = headers.get('X-Token-Remove');
+  const xTokenSet = headers.get('X-Token-Set');
+  const xTokenUnset = headers.get('X-Token-Unset');
 
-  if (xTokenRemove) {
+  if (xTokenUnset) {
     logout();
-  } else if (xTokenCreate || xTokenUpdate) {
-    setToken(xTokenCreate || xTokenUpdate);
+  } else if (xTokenSet) {
+    setToken(xTokenSet);
   }
 
   return response;

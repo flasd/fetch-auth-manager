@@ -27,14 +27,13 @@ function handleResponse(operation) {
   return (response) => {
     const { response: { headers } } = operation.getContext();
 
-    const xTokenCreate = headers.get('X-Token-Create');
-    const xTokenUpdate = headers.get('X-Token-Update');
-    const xTokenRemove = headers.get('X-Token-Remove');
+    const xTokenSet = headers.get('X-Token-Set');
+    const xTokenUnset = headers.get('X-Token-Remove');
 
-    if (xTokenRemove) {
+    if (xTokenUnset) {
       logout();
-    } else if (xTokenCreate || xTokenUpdate) {
-      setToken(xTokenCreate || xTokenUpdate);
+    } else if (xTokenSet) {
+      setToken(xTokenSet);
     }
 
     return response;
