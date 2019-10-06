@@ -22,7 +22,7 @@ const {
   manageAuth,
   authenticate,
   deauthenticate
-} = "fetch-auth-manager/server";
+} = "fetch-auth-manager/dist/server";
 ```
 
 #### manageAuth(options): ExpressMiddleware
@@ -33,7 +33,7 @@ Usage:
 
 ```javascript
 const app = require("express")();
-const { manageAuth } = require("fetch-auth-manager/server");
+const { manageAuth } = require("fetch-auth-manager/dist/server");
 
 const authManager = manageAuth({ secret: process.env.JWT_SECRET });
 
@@ -45,7 +45,7 @@ app.use(authManager);
 The `authenticate` function expects the Express Response object, any data you want present inside the token and some options. Call it when you want to set or update the user's JWT token.
 
 ```javascript
-const { authenticate } = require("fetch-auth-manager/server");
+const { authenticate } = require("fetch-auth-manager/dist/server");
 
 const options = {
   secret: process.env.JWT_SECRET, // default
@@ -63,7 +63,7 @@ function loginController(req, res) {
 The `deauthenticate` function expects the Express Response object. It will remove the user's token.
 
 ```javascript
-const { deauthenticate } = require("fetch-auth-manager/server");
+const { deauthenticate } = require("fetch-auth-manager/dist/server");
 
 function logoutController(req, res) {
   // your logout logic
@@ -137,7 +137,7 @@ The GraphQL transport has support for both `http` and `ws` links.
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
 import { createHttpLink } from "apollo-link-http";
-import { authHttpLink } from "fetch-auth-manager/link";
+import { authHttpLink } from "fetch-auth-manager/dist/link";
 
 const httpLink = createHttpLink({
   uri: "https://backend.com/graphql",
@@ -157,7 +157,7 @@ export const client = new ApolloClient({
 To use the WS transport, you need to prepare your backend. In your Apollo Setup:
 
 ```javascript
-const { parseWSAuth } from 'fetch-auth-manager/server';
+const { parseWSAuth } from 'fetch-auth-manager/dist/server';
 
 const apolloServer = new ApolloServer({
 	// ...your Config
@@ -175,7 +175,7 @@ Then, just decorate the WSLink options
 ```javascript
 import { ApolloClient } from "apollo-client";
 import { WebSocketLink } from "apollo-link-ws";
-import { withWSAuth } from "fetch-auth-manager/link";
+import { withWSAuth } from "fetch-auth-manager/dist/link";
 
 const wsLink = new WebSocketLink({
   uri: "ws://backend.com/graphql",
@@ -209,4 +209,4 @@ axios.interceptors.response.use(onResponse, onResponseError);
 
 ## Copyright e Licença
 
-Copyright (c) 2019 [Marcel de Oliveira Coelho](https://github.com/flasd) sob a [Licença MIT](https://github.com/flasd/fetch-auth-manager/blob/master/LICENSE.md). Go Crazy. :rocket:
+Copyright (c) 2019 [Marcel de Oliveira Coelho](https://github.com/husscode) sob a [Licença MIT](https://github.com/husscode/cpf-check/blob/master/LICENSE.md). Go Crazy. :rocket:
