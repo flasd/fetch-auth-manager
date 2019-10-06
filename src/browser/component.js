@@ -12,7 +12,7 @@ export class AuthProvider extends Component {
 
     this.state = {
       hasAuth: hasAuthFn(),
-      user: decoded,
+      decoded,
     };
 
     this.handleUpdate = this.handleUpdate.bind(this);
@@ -31,7 +31,7 @@ export class AuthProvider extends Component {
   handleUpdate(decoded) {
     this.setState({
       hasAuth: hasAuthFn(),
-      user: decoded,
+      decoded,
     });
   }
 

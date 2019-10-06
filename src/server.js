@@ -73,3 +73,22 @@ export function manageAuth(userOptions) {
 }
 
 export const exposeHeaders = ['X-Token-Set', 'X-Token-Unset'];
+
+export function decodedWsParams(userOptions, userOnConnect) {
+  const options = {
+    ...defaults,
+    ...userOptions,
+  };
+
+  return (params, ...rest) => {
+    const { Authorization, authorization } = params;
+
+    const withAuthParams = {
+      user: verifyAndDecode(authorization || Authorization, options),
+    };
+
+    return typeof userOnConnect === 'function'
+      ? userOnConnect(withAuthParams, ...rest)
+      : withAuthParams;
+  };
+}
