@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "eslint src --ext .js",
-    "build": "microbundle && babel src/server.js --out-file dist/server.js --source-maps"
+    "build": "microbundle && babel src/server.js --out-file server.js --source-maps"
   },
   "dependencies": {
     "apollo-link": "^1.2.13",

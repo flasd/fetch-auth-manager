@@ -22,7 +22,7 @@ const {
   manageAuth,
   authenticate,
   deauthenticate
-} = "fetch-auth-manager/dist/server";
+} = "fetch-auth-manager/server";
 ```
 
 #### manageAuth(options): ExpressMiddleware
@@ -33,7 +33,7 @@ Usage:
 
 ```javascript
 const app = require("express")();
-const { manageAuth } = require("fetch-auth-manager/dist/server");
+const { manageAuth } = require("fetch-auth-manager/server");
 
 const authManager = manageAuth({ secret: process.env.JWT_SECRET });
 
@@ -45,7 +45,7 @@ app.use(authManager);
 The `authenticate` function expects the Express Response object, any data you want present inside the token and some options. Call it when you want to set or update the user's JWT token.
 
 ```javascript
-const { authenticate } = require("fetch-auth-manager/dist/server");
+const { authenticate } = require("fetch-auth-manager/server");
 
 const options = {
   secret: process.env.JWT_SECRET, // default
@@ -63,7 +63,7 @@ function loginController(req, res) {
 The `deauthenticate` function expects the Express Response object. It will remove the user's token.
 
 ```javascript
-const { deauthenticate } = require("fetch-auth-manager/dist/server");
+const { deauthenticate } = require("fetch-auth-manager/server");
 
 function logoutController(req, res) {
   // your logout logic
@@ -157,7 +157,7 @@ export const client = new ApolloClient({
 To use the WS transport, you need to prepare your backend. In your Apollo Setup:
 
 ```javascript
-const { parseWSAuth } from 'fetch-auth-manager/dist/server';
+const { parseWSAuth } from 'fetch-auth-manager/server';
 
 const apolloServer = new ApolloServer({
 	// ...your Config
