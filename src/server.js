@@ -71,3 +71,5 @@ export function manageAuth(userOptions) {
     next();
   };
 }
+
+export const exposeHeaders = ['X-Token-Set', 'X-Token-Unset'];
