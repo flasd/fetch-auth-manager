@@ -34,7 +34,7 @@ function createToken(tokenData, options = {}) {
 
 function verifyAndDecode(token, options) {
   try {
-    return jsonWebToken.verify(token, options.secret);
+    return jsonWebToken.verify(`${token}`.replace('Bearer ', ''), options.secret);
   } catch (error) {
     return null;
   }
